@@ -1,0 +1,77 @@
+import SwiftUI
+
+enum SyncUpFormField: Hashable {
+  case attendee(Attendee.ID)
+  case title
+}
+
+struct SyncUpFormView: View {
+  @FocusState var focus: SyncUpFormField?
+  var body: some View {
+    Form {
+      Section {
+        TextField("Title", text: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Design@*/.constant("Design")/*@END_MENU_TOKEN@*/)
+          .focused($focus, equals: .title)
+        HStack {
+          Slider(value: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/.constant(Double(15))/*@END_MENU_TOKEN@*/, in: 5...30, step: 1) {
+            Text("Length")
+          }
+          Spacer()
+          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/Duration.seconds(15 * 60)/*@END_MENU_TOKEN@*/.formatted(.units()))
+        }
+        ThemePicker(selection: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=bubblegum@*/.constant(.bubblegum)/*@END_MENU_TOKEN@*/)
+      } header: {
+        Text("Sync-up Info")
+      }
+      Section {
+        ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=$attendees@*/SyncUp.mock.attendees.map(Binding.constant)/*@END_MENU_TOKEN@*/) { $attendee in
+          TextField("Name", text: $attendee.name)
+            .focused($focus, equals: .attendee(attendee.id))
+        }
+        .onDelete { indices in
+          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        }
+
+        Button("New attendee") {
+          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        }
+      } header: {
+        Text("Attendees")
+      }
+    }
+  }
+}
+
+
+#Preview {
+  NavigationStack {
+    SyncUpFormView()
+  }
+}
+
+struct ThemePicker: View {
+  @Binding var selection: Theme
+
+  var body: some View {
+    Picker("Theme", selection: $selection) {
+      ForEach(Theme.allCases) { theme in
+        ZStack {
+          RoundedRectangle(cornerRadius: 4)
+            .fill(theme.mainColor)
+          Label(theme.name, systemImage: "paintpalette")
+            .padding(4)
+        }
+        .foregroundColor(theme.accentColor)
+        .fixedSize(horizontal: false, vertical: true)
+        .tag(theme)
+      }
+    }
+  }
+}
+
+extension Duration {
+  fileprivate var minutes: Double {
+    get { Double(components.seconds / 60) }
+    set { self = .seconds(newValue * 60) }
+  }
+}
