@@ -26,12 +26,12 @@ struct Meeting: Equatable, Identifiable, Codable {
 }
 
 enum Theme: String, CaseIterable, Equatable, Identifiable, Codable {
-  case indigo
-  case magenta
-  case orange
-  case purple
-  case teal
-  case yellow
+  case appIndigo
+  case appMagenta
+  case appOrange
+  case appPurple
+  case appTeal
+  case appYellow
   case bubblegum
   case buttercup
   case lavender
@@ -47,10 +47,10 @@ enum Theme: String, CaseIterable, Equatable, Identifiable, Codable {
 
   var accentColor: Color {
     switch self {
-    case .orange, .teal, .yellow, .bubblegum, .buttercup, .lavender, .periwinkle, .poppy,
+    case .appOrange, .appTeal, .appYellow, .bubblegum, .buttercup, .lavender, .periwinkle, .poppy,
       .seafoam, .sky, .tan:
       return .black
-    case .indigo, .magenta, .purple, .navy, .oxblood:
+    case .appIndigo, .appMagenta, .appPurple, .navy, .oxblood:
       return .white
     }
   }
@@ -86,7 +86,7 @@ extension SyncUp {
           """
       )
     ],
-    theme: .orange,
+    theme: .appOrange,
     title: "Design"
   )
 
