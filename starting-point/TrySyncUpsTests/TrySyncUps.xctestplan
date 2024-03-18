@@ -1,0 +1,28 @@
+{
+  "configurations" : [
+    {
+      "id" : "D568F12C-3DAF-4491-BA1B-B14568030DB9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:TrySyncUps.xcodeproj",
+      "identifier" : "DC531C432BA3CF1E005C7270",
+      "name" : "TrySyncUps"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:TrySyncUps.xcodeproj",
+        "identifier" : "DC531C532BA3CF20005C7270",
+        "name" : "TrySyncUpsTests"
+      }
+    }
+  ],
+  "version" : 1
+}

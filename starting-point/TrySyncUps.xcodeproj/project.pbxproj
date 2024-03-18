@@ -34,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CA620C752BA7925A006C9105 /* TrySyncUps.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TrySyncUps.xctestplan; sourceTree = "<group>"; };
 		DC531C442BA3CF1E005C7270 /* TrySyncUps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrySyncUps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC531C472BA3CF1E005C7270 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		DC531C4B2BA3CF20005C7270 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -115,6 +116,7 @@
 		DC531C572BA3CF20005C7270 /* TrySyncUpsTests */ = {
 			isa = PBXGroup;
 			children = (
+				CA620C752BA7925A006C9105 /* TrySyncUps.xctestplan */,
 				DC531C582BA3CF20005C7270 /* RecordMeetingsTests.swift */,
 				DC531C802BA426C1005C7270 /* SyncUpDetailTests.swift */,
 				DC531C822BA426CC005C7270 /* SyncUpFormTests.swift */,
