@@ -69,7 +69,7 @@ struct MeetingHeaderView: View {
             .font(.caption)
           Label(durationRemaining.formatted(.units()), systemImage: "hourglass.tophalf.fill")
             .font(.body.monospacedDigit())
-            .labelStyle(.trailingIcon)
+            //.labelStyle(.trailingIcon)
         }
       }
     }

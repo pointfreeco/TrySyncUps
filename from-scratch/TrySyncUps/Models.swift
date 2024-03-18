@@ -30,7 +30,7 @@ enum Theme: String, CaseIterable, Equatable, Identifiable, Codable {
   case appMagenta
   case appOrange
   case appPurple
-  case appTeal
+  case teal
   case appYellow
   case bubblegum
   case buttercup
@@ -47,7 +47,7 @@ enum Theme: String, CaseIterable, Equatable, Identifiable, Codable {
 
   var accentColor: Color {
     switch self {
-    case .appOrange, .appTeal, .appYellow, .bubblegum, .buttercup, .lavender, .periwinkle, .poppy,
+    case .appOrange, .teal, .appYellow, .bubblegum, .buttercup, .lavender, .periwinkle, .poppy,
       .seafoam, .sky, .tan:
       return .black
     case .appIndigo, .appMagenta, .appPurple, .navy, .oxblood:

@@ -1,22 +1,53 @@
 import ComposableArchitecture
 import SwiftUI
 
+extension URL {
+  static let syncUps = URL.documentsDirectory.appending(path: "sync-ups.json")
+}
+
 @Reducer
 struct SyncUpsListFeature {
   @ObservableState
   struct State: Equatable {
-    var syncUps: IdentifiedArrayOf<SyncUp> = []
+    @Presents var addSyncUp: SyncUpFormFeature.State?
+    @Shared(.fileStorage(.syncUps)) var syncUps: IdentifiedArrayOf<SyncUp> = []
   }
   enum Action {
+    case addSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+    case addSyncUpButtonTapped
+    case cancelAddSyncUpButtonTapped
+    case confirmAddSyncUpButtonTapped
     case onDelete(IndexSet)
   }
+  @Dependency(\.uuid) var uuid
   var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
+      case .addSyncUp:
+        return .none
+
+      case .addSyncUpButtonTapped:
+        state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: uuid()))
+        return .none
+
+      case .cancelAddSyncUpButtonTapped:
+        state.addSyncUp = nil
+        return .none
+
+      case .confirmAddSyncUpButtonTapped:
+        guard let syncUp = state.addSyncUp?.syncUp
+        else { return .none }
+        state.syncUps.append(syncUp)
+        state.addSyncUp = nil
+        return .none
+
       case let .onDelete(indexSet):
         state.syncUps.remove(atOffsets: indexSet)
         return .none
       }
+    }
+    .ifLet(\.$addSyncUp, action: \.addSyncUp) {
+      SyncUpFormFeature()
     }
   }
 }
@@ -29,7 +60,7 @@ class SyncUpsModel {
 }
 
 struct SyncUpsListView: View {
-  let store: StoreOf<SyncUpsListFeature>
+  @Bindable var store: StoreOf<SyncUpsListFeature>
   //let model: SyncUpsModel
 
   var body: some View {
@@ -49,12 +80,26 @@ struct SyncUpsListView: View {
     }
     .toolbar {
       Button {
-        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        store.send(.addSyncUpButtonTapped)
       } label: {
         Image(systemName: "plus")
       }
     }
     .navigationTitle("Daily Sync-ups")
+    .sheet(item: $store.scope(state: \.addSyncUp, action: \.addSyncUp)) { formStore in
+      NavigationStack {
+        SyncUpFormView(store: formStore)
+          .navigationTitle("New sync up")
+          .toolbar {
+            ToolbarItem {
+              Button("Add") { store.send(.confirmAddSyncUpButtonTapped) }
+            }
+            ToolbarItem(placement: .cancellationAction) {
+              Button("Cancel") { store.send(.cancelAddSyncUpButtonTapped) }
+            }
+          }
+      }
+    }
   }
 }
 
@@ -63,6 +108,7 @@ struct SyncUpsListView: View {
     SyncUpsListView(
       store: Store(
         initialState: SyncUpsListFeature.State(
+          //addSyncUp: SyncUpFormFeature.State(syncUp: .mock),
           syncUps: [.mock, .productMock, .engineeringMock]
         )
       ) {

@@ -1,6 +1,47 @@
+import ComposableArchitecture
 import SwiftUI
 
+@Reducer
+struct SyncUpDetailFeature {
+  @ObservableState
+  struct State {
+    @Presents var editSyncUp: SyncUpFormFeature.State?
+    @Shared var syncUp: SyncUp
+  }
+  enum Action {
+    case cancelEditSyncUpButtonTapped
+    case confirmSaveSyncUpButtonTapped
+    case editButtonTapped
+    case editSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+  }
+  var body: some ReducerOf<Self> {
+    Reduce { state, action in
+      switch action {
+      case .cancelEditSyncUpButtonTapped:
+        state.editSyncUp = nil
+        return .none
+      case .confirmSaveSyncUpButtonTapped:
+        guard let syncUp = state.editSyncUp?.syncUp
+        else { return .none }
+        state.syncUp = syncUp
+        state.editSyncUp = nil
+        return .none
+      case .editButtonTapped:
+        state.editSyncUp = SyncUpFormFeature.State(syncUp: state.syncUp)
+        return .none
+      case .editSyncUp:
+        return .none
+      }
+    }
+    .ifLet(\.$editSyncUp, action: \.editSyncUp) {
+      SyncUpFormFeature()
+    }
+  }
+}
+
 struct SyncUpDetailView: View {
+  @Bindable var store: StoreOf<SyncUpDetailFeature>
+
   var body: some View {
     Form {
       Section {
@@ -14,25 +55,25 @@ struct SyncUpDetailView: View {
         HStack {
           Label("Length", systemImage: "clock")
           Spacer()
-          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/Duration.seconds(15 * 60)/*@END_MENU_TOKEN@*/.formatted(.units()))
+          Text(store.syncUp.duration.formatted(.units()))
         }
 
         HStack {
           Label("Theme", systemImage: "paintpalette")
           Spacer()
-          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.name)
+          Text(store.syncUp.theme.name)
             .padding(4)
-            .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.accentColor)
-            .background(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.mainColor)
+            .foregroundColor(store.syncUp.theme.accentColor)
+            .background(store.syncUp.theme.mainColor)
             .cornerRadius(4)
         }
       } header: {
         Text("Sync-up Info")
       }
 
-      if /*@START_MENU_TOKEN@*//*@PLACEHOLDER=meetings@*/SyncUp.mock.meetings/*@END_MENU_TOKEN@*/.isEmpty == false {
+      if store.syncUp.meetings.isEmpty == false {
         Section {
-          ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=meetings@*/SyncUp.mock.meetings/*@END_MENU_TOKEN@*/) { meeting in
+          ForEach(store.syncUp.meetings) { meeting in
             NavigationLink {
               /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
             } label: {
@@ -52,7 +93,7 @@ struct SyncUpDetailView: View {
       }
 
       Section {
-        ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=attendees@*/SyncUp.mock.attendees/*@END_MENU_TOKEN@*/) { attendee in
+        ForEach(store.syncUp.attendees) { attendee in
           Label(attendee.name, systemImage: "person")
         }
       } header: {
@@ -69,15 +110,37 @@ struct SyncUpDetailView: View {
     }
     .toolbar {
       Button("Edit") {
-        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        store.send(.editButtonTapped)
       }
     }
-    .navigationTitle(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=Design@*/SyncUp.mock.title/*@END_MENU_TOKEN@*/)
+    .navigationTitle(Text(store.syncUp.title))
+    .sheet(item: $store.scope(state: \.editSyncUp, action: \.editSyncUp)) { formStore in
+      NavigationStack {
+        SyncUpFormView(store: formStore)
+          .navigationTitle(Text("Edit sync up"))
+          .toolbar {
+            ToolbarItem {
+              Button("Save") {
+                store.send(.confirmSaveSyncUpButtonTapped)
+              }
+            }
+            ToolbarItem(placement: .cancellationAction) {
+              Button("Cancel") {
+                store.send(.cancelEditSyncUpButtonTapped)
+              }
+            }
+          }
+      }
+    }
   }
 }
 
 #Preview {
   NavigationStack {
-    SyncUpDetailView()
+    SyncUpDetailView(
+      store: Store(initialState: SyncUpDetailFeature.State(syncUp: Shared(.mock))) {
+        SyncUpDetailFeature()
+      }
+    )
   }
 }

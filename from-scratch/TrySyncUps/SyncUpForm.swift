@@ -1,33 +1,62 @@
+import ComposableArchitecture
 import SwiftUI
 
+@Reducer
+struct SyncUpFormFeature {
+  @ObservableState
+  struct State: Equatable {
+    var syncUp: SyncUp
+  }
+  enum Action: BindableAction {
+    case addAttendeeButtonTapped
+    case binding(BindingAction<State>)
+    case onDeleteAttendees(IndexSet)
+  }
+  var body: some ReducerOf<Self> {
+    BindingReducer()
+    Reduce<State, Action> { state, action in
+      switch action {
+      case .addAttendeeButtonTapped:
+        state.syncUp.attendees.append(Attendee(id: UUID()))
+        return .none
+      case .binding:
+        return .none
+      case let .onDeleteAttendees(indexSet):
+        state.syncUp.attendees.remove(atOffsets: indexSet)
+        return .none
+      }
+    }
+  }
+}
+
 struct SyncUpFormView: View {
-  @Binding var syncUp: SyncUp
+  @Bindable var store: StoreOf<SyncUpFormFeature>
 
   var body: some View {
     Form {
       Section {
-        TextField("Title", text: $syncUp.title)
+        TextField("Title", text: $store.syncUp.title)
         HStack {
-          Slider(value: $syncUp.duration.minutes, in: 5...30, step: 1) {
+          Slider(value: $store.syncUp.duration.minutes, in: 5...30, step: 1) {
             Text("Length")
           }
           Spacer()
-          Text(syncUp.duration.formatted(.units()))
+          Text(store.syncUp.duration.formatted(.units()))
         }
-        ThemePicker(selection: $syncUp.theme)
+        ThemePicker(selection: $store.syncUp.theme)
       } header: {
         Text("Sync-up Info")
       }
       Section {
-        ForEach($syncUp.attendees) { $attendee in
+        ForEach($store.syncUp.attendees) { $attendee in
           TextField("Name", text: $attendee.name)
         }
         .onDelete { indices in
-          syncUp.attendees.remove(atOffsets: indices)
+          store.send(.onDeleteAttendees(indices))
         }
 
         Button("New attendee") {
-          syncUp.attendees.append(Attendee(id: UUID()))
+          store.send(.addAttendeeButtonTapped)
         }
       } header: {
         Text("Attendees")
@@ -39,7 +68,11 @@ struct SyncUpFormView: View {
 
 #Preview {
   NavigationStack {
-    SyncUpFormView(syncUp: .constant(.mock))
+    SyncUpFormView(
+      store: Store(initialState: SyncUpFormFeature.State(syncUp: .mock)) {
+        SyncUpFormFeature()
+      }
+    )
   }
 }
 
