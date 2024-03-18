@@ -3,7 +3,9 @@ import XCTest
 
 @testable import TrySyncUps
 
-final class SyncUpsListsTests: XCTestCase {
+final class SyncUpsListTests: XCTestCase {
+  // var store: TestStoreOf<SyncUpsList>!
+
   @MainActor
   func testBasics() async {
   }
