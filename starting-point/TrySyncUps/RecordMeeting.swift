@@ -4,13 +4,13 @@ struct RecordMeetingView: View {
   var body: some View {
     ZStack {
       RoundedRectangle(cornerRadius: 16)
-        .fill(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=orange@*/Theme.orange/*@END_MENU_TOKEN@*/.mainColor)
+        .fill(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.mainColor)
 
       VStack {
         MeetingHeaderView(
           secondsElapsed: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=60 seconds@*/60/*@END_MENU_TOKEN@*/,
           durationRemaining: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=14 minutes@*/.seconds(60 * 14)/*@END_MENU_TOKEN@*/,
-          theme: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=orange@*/Theme.orange/*@END_MENU_TOKEN@*/
+          theme: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/
         )
         MeetingTimerView(
           syncUp: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=syncUp@*/SyncUp.mock/*@END_MENU_TOKEN@*/,
@@ -26,7 +26,7 @@ struct RecordMeetingView: View {
       }
     }
     .padding()
-    .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=orange@*/Theme.orange/*@END_MENU_TOKEN@*/.accentColor)
+    .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.accentColor)
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .cancellationAction) {
@@ -35,6 +35,7 @@ struct RecordMeetingView: View {
         }
       }
     }
+    .interactiveDismissDisabled(true)
     .navigationBarBackButtonHidden(true)
   }
 }

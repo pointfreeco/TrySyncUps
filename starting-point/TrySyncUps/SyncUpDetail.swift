@@ -20,10 +20,10 @@ struct SyncUpDetailView: View {
         HStack {
           Label("Theme", systemImage: "paintpalette")
           Spacer()
-          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=orange@*/Theme.orange/*@END_MENU_TOKEN@*/.name)
+          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.name)
             .padding(4)
-            .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=orange@*/Theme.orange/*@END_MENU_TOKEN@*/.accentColor)
-            .background(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=orange@*/Theme.orange/*@END_MENU_TOKEN@*/.mainColor)
+            .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.accentColor)
+            .background(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.mainColor)
             .cornerRadius(4)
         }
       } header: {

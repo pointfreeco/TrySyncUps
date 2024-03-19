@@ -1,32 +1,69 @@
+import ComposableArchitecture
 import SwiftUI
 
+@Reducer
+struct RecordMeetingFeature {
+  @ObservableState
+  struct State: Equatable {
+    let syncUp: SyncUp
+    var secondsElapsed = 0
+    var speakerIndex = 0
+    
+    var durationRemaining: Duration {
+      syncUp.duration - .seconds(secondsElapsed)
+    }
+  }
+  enum Action {
+    case onAppear
+    case timerTick
+  }
+  var body: some ReducerOf<Self> {
+    Reduce { state, action in
+      switch action {
+      case .onAppear:
+        return .run { send in
+          while true {
+            try await Task.sleep(for: .seconds(1))
+            await send(.timerTick)
+          }
+        }
+      case .timerTick:
+        state.secondsElapsed += 1
+        return .none
+      }
+    }
+  }
+}
+
 struct RecordMeetingView: View {
+  let store: StoreOf<RecordMeetingFeature>
+
   var body: some View {
     ZStack {
       RoundedRectangle(cornerRadius: 16)
-        .fill(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.mainColor)
+        .fill(store.syncUp.theme.mainColor)
 
       VStack {
         MeetingHeaderView(
-          secondsElapsed: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=60 seconds@*/60/*@END_MENU_TOKEN@*/,
-          durationRemaining: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=14 minutes@*/.seconds(60 * 14)/*@END_MENU_TOKEN@*/,
-          theme: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/
+          secondsElapsed: store.secondsElapsed,
+          durationRemaining: store.durationRemaining,
+          theme: store.syncUp.theme
         )
         MeetingTimerView(
-          syncUp: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=syncUp@*/SyncUp.mock/*@END_MENU_TOKEN@*/,
-          speakerIndex: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=0@*/0/*@END_MENU_TOKEN@*/
+          syncUp: store.syncUp,
+          speakerIndex: store.speakerIndex
         )
         MeetingFooterView(
-          syncUp: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=syncUp@*/SyncUp.mock/*@END_MENU_TOKEN@*/,
+          syncUp: store.syncUp,
           nextButtonTapped: {
             /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
           },
-          speakerIndex: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=0@*/0/*@END_MENU_TOKEN@*/
+          speakerIndex: store.speakerIndex
         )
       }
     }
     .padding()
-    .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.accentColor)
+    .foregroundColor(store.syncUp.theme.accentColor)
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .cancellationAction) {
@@ -35,13 +72,21 @@ struct RecordMeetingView: View {
         }
       }
     }
+    .interactiveDismissDisabled(true)
     .navigationBarBackButtonHidden(true)
+    .onAppear {
+      store.send(.onAppear)
+    }
   }
 }
 
 #Preview {
   NavigationStack {
-    RecordMeetingView()
+    RecordMeetingView(
+      store: Store(initialState: RecordMeetingFeature.State(syncUp: .mock)) {
+        RecordMeetingFeature()
+      }
+    )
   }
 }
 

@@ -4,19 +4,33 @@ import SwiftUI
 @Reducer
 struct SyncUpDetailFeature {
   @ObservableState
-  struct State {
+  struct State: Equatable {
+    @Presents var alert: AlertState<Action.Alert>?
     @Presents var editSyncUp: SyncUpFormFeature.State?
+    @Presents var recordMeeting: RecordMeetingFeature.State?
     @Shared var syncUp: SyncUp
   }
   enum Action {
+    case alert(PresentationAction<Alert>)
     case cancelEditSyncUpButtonTapped
     case confirmSaveSyncUpButtonTapped
+    case deleteButtonTapped
     case editButtonTapped
     case editSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+    case recordMeeting(PresentationAction<RecordMeetingFeature.Action>)
+    case startMeetingButtonTapped
+    enum Alert {
+      case confirmDelete
+    }
   }
   var body: some ReducerOf<Self> {
-    Reduce { state, action in
+    Reduce<State, Action> { state, action in
       switch action {
+      case .alert(.presented(.confirmDelete)):
+        // ????
+        return .none
+      case .alert:
+        return .none
       case .cancelEditSyncUpButtonTapped:
         state.editSyncUp = nil
         return .none
@@ -26,15 +40,36 @@ struct SyncUpDetailFeature {
         state.syncUp = syncUp
         state.editSyncUp = nil
         return .none
+      case .deleteButtonTapped:
+        state.alert = AlertState {
+          TextState("Are you sure you want to delete this sync up?")
+        } actions: {
+          ButtonState(action: .confirmDelete) {
+            TextState("Yes")
+          }
+          ButtonState(role: .cancel) {
+            TextState("Nevermind")
+          }
+        }
+        return .none
       case .editButtonTapped:
         state.editSyncUp = SyncUpFormFeature.State(syncUp: state.syncUp)
         return .none
       case .editSyncUp:
         return .none
+      case .recordMeeting:
+        return .none
+      case .startMeetingButtonTapped:
+        state.recordMeeting = RecordMeetingFeature.State(syncUp: state.syncUp)
+        return .none
       }
     }
+    .ifLet(\.$alert, action: \.alert)
     .ifLet(\.$editSyncUp, action: \.editSyncUp) {
       SyncUpFormFeature()
+    }
+    .ifLet(\.$recordMeeting, action: \.recordMeeting) {
+      RecordMeetingFeature()
     }
   }
 }
@@ -46,7 +81,7 @@ struct SyncUpDetailView: View {
     Form {
       Section {
         Button {
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.startMeetingButtonTapped)
         } label: {
           Label("Start Meeting", systemImage: "timer")
             .font(.headline)
@@ -102,7 +137,7 @@ struct SyncUpDetailView: View {
 
       Section {
         Button("Delete") {
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.deleteButtonTapped)
         }
         .foregroundColor(.red)
         .frame(maxWidth: .infinity)
@@ -114,6 +149,7 @@ struct SyncUpDetailView: View {
       }
     }
     .navigationTitle(Text(store.syncUp.title))
+    .alert($store.scope(state: \.alert, action: \.alert))
     .sheet(item: $store.scope(state: \.editSyncUp, action: \.editSyncUp)) { formStore in
       NavigationStack {
         SyncUpFormView(store: formStore)
@@ -132,6 +168,11 @@ struct SyncUpDetailView: View {
           }
       }
     }
+    .sheet(item: $store.scope(state: \.recordMeeting, action: \.recordMeeting)) { recordStore in
+      NavigationStack {
+        RecordMeetingView(store: recordStore)
+      }
+    }
   }
 }
 
@@ -140,6 +181,7 @@ struct SyncUpDetailView: View {
     SyncUpDetailView(
       store: Store(initialState: SyncUpDetailFeature.State(syncUp: Shared(.mock))) {
         SyncUpDetailFeature()
+          ._printChanges()
       }
     )
   }

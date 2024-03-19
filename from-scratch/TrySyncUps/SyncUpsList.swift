@@ -10,6 +10,7 @@ struct SyncUpsListFeature {
   @ObservableState
   struct State: Equatable {
     @Presents var addSyncUp: SyncUpFormFeature.State?
+    @Presents var syncUpDetail: SyncUpDetailFeature.State?
     @Shared(.fileStorage(.syncUps)) var syncUps: IdentifiedArrayOf<SyncUp> = []
   }
   enum Action {
@@ -18,6 +19,8 @@ struct SyncUpsListFeature {
     case cancelAddSyncUpButtonTapped
     case confirmAddSyncUpButtonTapped
     case onDelete(IndexSet)
+    case syncUpDetail(PresentationAction<SyncUpDetailFeature.Action>)
+    case syncUpTapped(id: SyncUp.ID)
   }
   @Dependency(\.uuid) var uuid
   var body: some ReducerOf<Self> {
@@ -44,10 +47,22 @@ struct SyncUpsListFeature {
       case let .onDelete(indexSet):
         state.syncUps.remove(atOffsets: indexSet)
         return .none
+
+      case .syncUpDetail:
+        return .none
+
+      case let .syncUpTapped(id: id):
+        guard let syncUp = state.$syncUps[id: id]
+        else { return .none }
+        state.syncUpDetail = SyncUpDetailFeature.State(syncUp: syncUp)
+        return .none
       }
     }
     .ifLet(\.$addSyncUp, action: \.addSyncUp) {
       SyncUpFormFeature()
+    }
+    .ifLet(\.$syncUpDetail, action: \.syncUpDetail) {
+      SyncUpDetailFeature()
     }
   }
 }
@@ -67,7 +82,7 @@ struct SyncUpsListView: View {
     List {
       ForEach(store.syncUps) { syncUp in
         Button {
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.syncUpTapped(id: syncUp.id))
         } label: {
           CardView(syncUp: syncUp)
         }
@@ -99,6 +114,9 @@ struct SyncUpsListView: View {
             }
           }
       }
+    }
+    .navigationDestination(item: $store.scope(state: \.syncUpDetail, action: \.syncUpDetail)) { detailStore in
+      SyncUpDetailView(store: detailStore)
     }
   }
 }

@@ -26,11 +26,11 @@ struct Meeting: Equatable, Identifiable, Codable {
 }
 
 enum Theme: String, CaseIterable, Equatable, Identifiable, Codable {
-  case indigo
-  case magenta
-  case orange
-  case purple
-  case teal
+  case appIndigo
+  case appMagenta
+  case appOrange
+  case appPurple
+  case appTeal
   case yellow
   case bubblegum
   case buttercup
@@ -47,17 +47,52 @@ enum Theme: String, CaseIterable, Equatable, Identifiable, Codable {
 
   var accentColor: Color {
     switch self {
-    case .orange, .teal, .yellow, .bubblegum, .buttercup, .lavender, .periwinkle, .poppy,
+    case .appOrange, .appTeal, .yellow, .bubblegum, .buttercup, .lavender, .periwinkle, .poppy,
       .seafoam, .sky, .tan:
       return .black
-    case .indigo, .magenta, .purple, .navy, .oxblood:
+    case .appIndigo, .appMagenta, .appPurple, .navy, .oxblood:
       return .white
     }
   }
 
   var mainColor: Color { Color(rawValue) }
 
-  var name: String { rawValue.capitalized }
+  var name: String {
+    switch self {
+    case .appIndigo:
+      "indigo"
+    case .appMagenta:
+      "magent"
+    case .appOrange:
+      "orange"
+    case .appPurple:
+      "purple"
+    case .appTeal:
+      "teal"
+    case .yellow:
+      "yellow"
+    case .bubblegum:
+      "bubblegum"
+    case .buttercup:
+      "buttercup"
+    case .lavender:
+      "lavender"
+    case .navy:
+      "navy"
+    case .oxblood:
+      "oxblood"
+    case .periwinkle:
+      "periwinkle"
+    case .poppy:
+      "poppy"
+    case .seafoam:
+      "seafoam"
+    case .sky:
+      "sky"
+    case .tan:
+      "tan"
+    }
+  }
 }
 
 extension SyncUp {
@@ -86,7 +121,7 @@ extension SyncUp {
           """
       )
     ],
-    theme: .orange,
+    theme: .appOrange,
     title: "Design"
   )
 
