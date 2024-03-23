@@ -1,31 +1,74 @@
 import ComposableArchitecture
 import SwiftUI
 
+@Reducer
+struct SyncUpsListFeature {
+  @ObservableState
+  struct State: Equatable {
+    var syncUps: [SyncUp] = []
+  }
+  enum Action {
+    case onDelete(_ indexSet: IndexSet)
+    case syncUpTapped(id: SyncUp.ID)
+    case addSyncUpButtonTapped
+  }
+  var body: some ReducerOf<Self> {
+    Reduce { state, action in
+      switch action {
+      case let .onDelete(indexSet):
+        state.syncUps.remove(atOffsets: indexSet)
+        return .none
+      case .syncUpTapped:
+        return .none
+      case .addSyncUpButtonTapped:
+        return .none
+      }
+    }
+  }
+}
+
 @Observable
 class SyncUpsListModel {
+  var syncUps: [SyncUp] = []
 
+  init(syncUps: [SyncUp] = []) {
+    self.syncUps = syncUps
+  }
+
+  func onDelete(_ indexSet: IndexSet) {
+    self.syncUps.remove(atOffsets: indexSet)
+  }
+
+  func syncUpTapped(id: SyncUp.ID) {
+    /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+  }
+
+  func addSyncUpButtonTapped() {
+    /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+  }
 }
 
 struct SyncUpsListView: View {
-  let model: SyncUpsListModel
-  
+  //let model: SyncUpsListModel
+  let store: StoreOf<SyncUpsListFeature>
+
   var body: some View {
     List {
-      ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=syncUps@*/[SyncUp.mock, .engineeringMock, .productMock]/*@END_MENU_TOKEN@*/) { syncUp in
+      ForEach(store.syncUps) { syncUp in
         Button {
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.syncUpTapped(id: syncUp.id))
         } label: {
           CardView(syncUp: syncUp)
         }
         .listRowBackground(syncUp.theme.mainColor)
       }
       .onDelete { indexSet in
-        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        store.send(.onDelete(indexSet))
       }
     }
     .toolbar {
       Button {
-        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        store.send(.addSyncUpButtonTapped)
       } label: {
         Image(systemName: "plus")
       }
@@ -36,7 +79,16 @@ struct SyncUpsListView: View {
 
 #Preview {
   NavigationStack {
-    SyncUpsListView()
+    SyncUpsListView(
+      store: Store(
+        initialState: SyncUpsListFeature.State(
+          syncUps: [.mock, .productMock, .engineeringMock]
+        )
+      ) {
+        SyncUpsListFeature()
+          ._printChanges()
+      }
+    )
   }
 }
 

@@ -4,6 +4,10 @@ import SwiftUI
 class SyncUpsListModel {
   var syncUps: [SyncUp] = []
 
+  init(syncUps: [SyncUp] = []) {
+    self.syncUps = syncUps
+  }
+
   func onDelete(_ indexSet: IndexSet) {
     self.syncUps.remove(atOffsets: indexSet)
   }
