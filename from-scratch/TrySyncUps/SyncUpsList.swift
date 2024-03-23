@@ -1,42 +1,31 @@
+import ComposableArchitecture
 import SwiftUI
 
 @Observable
 class SyncUpsListModel {
-  var syncUps: [SyncUp] = []
 
-  func onDelete(_ indexSet: IndexSet) {
-    self.syncUps.remove(atOffsets: indexSet)
-  }
-
-  func syncUpTapped(id: SyncUp.ID) {
-    /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
-  }
-
-  func addSyncUpButtonTapped() {
-    /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
-  }
 }
 
 struct SyncUpsListView: View {
   let model: SyncUpsListModel
-
+  
   var body: some View {
     List {
-      ForEach(model.syncUps) { syncUp in
+      ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=syncUps@*/[SyncUp.mock, .engineeringMock, .productMock]/*@END_MENU_TOKEN@*/) { syncUp in
         Button {
-          model.syncUpTapped(id: syncUp.id)
+          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
         } label: {
           CardView(syncUp: syncUp)
         }
         .listRowBackground(syncUp.theme.mainColor)
       }
       .onDelete { indexSet in
-        model.onDelete(indexSet)
+        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
       }
     }
     .toolbar {
       Button {
-        model.addSyncUpButtonTapped()
+        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
       } label: {
         Image(systemName: "plus")
       }
@@ -47,7 +36,7 @@ struct SyncUpsListView: View {
 
 #Preview {
   NavigationStack {
-    SyncUpsListView(model: SyncUpsListModel())
+    SyncUpsListView()
   }
 }
 
