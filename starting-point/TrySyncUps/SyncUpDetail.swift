@@ -15,6 +15,8 @@ struct SyncUpDetailFeature {
 }
 
 struct SyncUpDetailView: View {
+  @Bindable var store: StoreOf<SyncUpDetailFeature>
+
   var body: some View {
     Form {
       Section {
@@ -28,25 +30,25 @@ struct SyncUpDetailView: View {
         HStack {
           Label("Length", systemImage: "clock")
           Spacer()
-          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/Duration.seconds(15 * 60)/*@END_MENU_TOKEN@*/.formatted(.units()))
+          Text(store.syncUp.duration.formatted(.units()))
         }
 
         HStack {
           Label("Theme", systemImage: "paintpalette")
           Spacer()
-          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.name)
+          Text(store.syncUp.title)
             .padding(4)
-            .foregroundColor(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.accentColor)
-            .background(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=appOrange@*/Theme.appOrange/*@END_MENU_TOKEN@*/.mainColor)
+            .foregroundColor(store.syncUp.theme.accentColor)
+            .background(store.syncUp.theme.mainColor)
             .cornerRadius(4)
         }
       } header: {
         Text("Sync-up Info")
       }
 
-      if /*@START_MENU_TOKEN@*//*@PLACEHOLDER=meetings@*/SyncUp.mock.meetings/*@END_MENU_TOKEN@*/.isEmpty == false {
+      if !store.syncUp.meetings.isEmpty {
         Section {
-          ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=meetings@*/SyncUp.mock.meetings/*@END_MENU_TOKEN@*/) { meeting in
+          ForEach(store.syncUp.meetings) { meeting in
             NavigationLink {
               /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
             } label: {
@@ -66,7 +68,7 @@ struct SyncUpDetailView: View {
       }
 
       Section {
-        ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=attendees@*/SyncUp.mock.attendees/*@END_MENU_TOKEN@*/) { attendee in
+        ForEach(store.syncUp.attendees) { attendee in
           Label(attendee.name, systemImage: "person")
         }
       } header: {
@@ -86,12 +88,16 @@ struct SyncUpDetailView: View {
         /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
       }
     }
-    .navigationTitle(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=Design@*/SyncUp.mock.title/*@END_MENU_TOKEN@*/)
+    .navigationTitle(store.syncUp.title)
   }
 }
 
 #Preview {
   NavigationStack {
-    SyncUpDetailView()
+    SyncUpDetailView(
+      store: Store(initialState: SyncUpDetailFeature.State(syncUp: .mock)) {
+        SyncUpDetailFeature()
+      }
+    )
   }
 }

@@ -1,6 +1,19 @@
 import ComposableArchitecture
 import SwiftUI
 
+@Reducer
+struct SyncUpFormFeature {
+  @ObservableState
+  struct State: Equatable {
+    var syncUp: SyncUp
+  }
+  enum Action {
+  }
+  var body: some ReducerOf<Self> {
+    EmptyReducer()
+  }
+}
+
 struct SyncUpFormView: View {
   var body: some View {
     Form {
