@@ -1,4 +1,19 @@
+import ComposableArchitecture
 import SwiftUI
+
+@Reducer
+struct SyncUpFormFeature {
+  @ObservableState
+  struct State {
+    var syncUp: SyncUp
+  }
+  enum Action: BindableAction {
+    case binding(BindingAction<State>)
+  }
+  var body: some ReducerOf<Self> {
+    BindableReducer()
+  }
+}
 
 enum SyncUpFormField: Hashable {
   case attendee(Attendee.ID)
@@ -6,12 +21,11 @@ enum SyncUpFormField: Hashable {
 }
 
 struct SyncUpFormView: View {
-  @FocusState var focus: SyncUpFormField?
+  @Bindable var store: StoreOf<SyncUpFormFeature>
   var body: some View {
     Form {
       Section {
-        TextField("Title", text: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Design@*/.constant("Design")/*@END_MENU_TOKEN@*/)
-          .focused($focus, equals: .title)
+        TextField("Title", text: $store.syncUp.title)
         HStack {
           Slider(value: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/.constant(Double(15))/*@END_MENU_TOKEN@*/, in: 5...30, step: 1) {
             Text("Length")
@@ -26,7 +40,6 @@ struct SyncUpFormView: View {
       Section {
         ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=$attendees@*/SyncUp.mock.attendees.map(Binding.constant)/*@END_MENU_TOKEN@*/) { $attendee in
           TextField("Name", text: $attendee.name)
-            .focused($focus, equals: .attendee(attendee.id))
         }
         .onDelete { indices in
           /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
