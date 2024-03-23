@@ -11,7 +11,7 @@ struct SyncUpFormFeature {
     case binding(BindingAction<State>)
   }
   var body: some ReducerOf<Self> {
-    BindableReducer()
+    BindingReducer()
   }
 }
 
@@ -58,7 +58,7 @@ struct SyncUpFormView: View {
 
 #Preview {
   NavigationStack {
-    SyncUpFormView()
+//    SyncUpFormView()
   }
 }
 

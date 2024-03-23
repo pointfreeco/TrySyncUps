@@ -1,17 +1,10 @@
 import SwiftUI
 
-enum SyncUpFormField: Hashable {
-  case attendee(Attendee.ID)
-  case title
-}
-
 struct SyncUpFormView: View {
-  @FocusState var focus: SyncUpFormField?
   var body: some View {
     Form {
       Section {
         TextField("Title", text: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Design@*/.constant("Design")/*@END_MENU_TOKEN@*/)
-          .focused($focus, equals: .title)
         HStack {
           Slider(value: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/.constant(Double(15))/*@END_MENU_TOKEN@*/, in: 5...30, step: 1) {
             Text("Length")
@@ -26,7 +19,6 @@ struct SyncUpFormView: View {
       Section {
         ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=$attendees@*/SyncUp.mock.attendees.map(Binding.constant)/*@END_MENU_TOKEN@*/) { $attendee in
           TextField("Name", text: $attendee.name)
-            .focused($focus, equals: .attendee(attendee.id))
         }
         .onDelete { indices in
           /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
@@ -41,7 +33,6 @@ struct SyncUpFormView: View {
     }
   }
 }
-
 
 #Preview {
   NavigationStack {

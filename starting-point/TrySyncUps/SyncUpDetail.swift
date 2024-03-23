@@ -1,5 +1,18 @@
 import SwiftUI
 
+@Reducer
+struct SyncUpDetailFeature {
+  @ObservableState
+  struct State: Equatable {
+    var syncUp: SyncUp
+  }
+  enum Action {
+  }
+  var body: some ReducerOf<Self> {
+    EmptyReducer()
+  }
+}
+
 struct SyncUpDetailView: View {
   var body: some View {
     Form {
