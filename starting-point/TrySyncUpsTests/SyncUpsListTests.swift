@@ -6,6 +6,9 @@ import XCTest
 final class SyncUpsListTests: XCTestCase {
   @MainActor
   func testBasics() async {
+    let store = TestStore(initialState: SyncUpsListFeature.State(syncUps: [.mock, .productMock])) {
+      SyncUpsListFeature()
+    }
   }
 
   @MainActor

@@ -4,7 +4,7 @@ import SwiftUI
 @Reducer
 struct SyncUpsListFeature {
   @ObservableState
-  struct State {
+  struct State: Equatable {
     var syncUps: [SyncUp] = []
   }
   enum Action {
