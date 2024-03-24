@@ -1,12 +1,16 @@
 import ComposableArchitecture
 import SwiftUI
 
+extension URL {
+  static let syncUps = URL.documentsDirectory.appending(path: "sync-ups.json")
+}
+
 @Reducer
 struct SyncUpsListFeature {
   @ObservableState
   struct State: Equatable {
     @Presents var addSyncUp: SyncUpFormFeature.State?
-    var syncUps: [SyncUp] = []
+    @Shared(.fileStorage(.syncUps)) var syncUps: [SyncUp] = []
   }
   enum Action {
     case addButtonTapped
