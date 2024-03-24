@@ -7,39 +7,56 @@ struct SyncUpFormFeature {
   struct State: Equatable {
     var syncUp: SyncUp
   }
-  enum Action {
+  enum Action: BindableAction {
+    case binding(BindingAction<State>)
+    case onDeleteAttendees(IndexSet)
+    case addAttendeeButtonTapped
   }
   var body: some ReducerOf<Self> {
-    EmptyReducer()
+    BindingReducer()
+    Reduce { state, action in
+      switch action {
+      case .binding(_):
+        return .none
+      case let .onDeleteAttendees(indexSet):
+        state.syncUp.attendees.remove(atOffsets: indexSet)
+        return .none
+      case .addAttendeeButtonTapped:
+        state.syncUp.attendees.append(Attendee(id: UUID()))
+        return .none
+      }
+    }
   }
 }
 
 struct SyncUpFormView: View {
+  @Bindable var store: StoreOf<SyncUpFormFeature>
+
   var body: some View {
     Form {
       Section {
-        TextField("Title", text: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Design@*/.constant("Design")/*@END_MENU_TOKEN@*/)
+        TextField("Title", text: $store.syncUp.title)
         HStack {
-          Slider(value: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/.constant(Double(15))/*@END_MENU_TOKEN@*/, in: 5...30, step: 1) {
+          Slider(value: $store.syncUp.duration.minutes, in: 5...30, step: 1) {
             Text("Length")
           }
           Spacer()
-          Text(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=15 minutes@*/Duration.seconds(15 * 60)/*@END_MENU_TOKEN@*/.formatted(.units()))
+          Text(store.syncUp.duration.formatted(.units()))
         }
-        ThemePicker(selection: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=bubblegum@*/.constant(.bubblegum)/*@END_MENU_TOKEN@*/)
+        ThemePicker(selection: $store.syncUp.theme)
       } header: {
         Text("Sync-up Info")
       }
       Section {
-        ForEach(/*@START_MENU_TOKEN@*//*@PLACEHOLDER=$attendees@*/SyncUp.mock.attendees.map(Binding.constant)/*@END_MENU_TOKEN@*/) { $attendee in
+        ForEach($store.syncUp.attendees) { $attendee in
           TextField("Name", text: $attendee.name)
         }
         .onDelete { indices in
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.onDeleteAttendees(indices))
         }
 
         Button("New attendee") {
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.addAttendeeButtonTapped)
         }
       } header: {
         Text("Attendees")
@@ -50,7 +67,12 @@ struct SyncUpFormView: View {
 
 #Preview {
   NavigationStack {
-    SyncUpFormView()
+    SyncUpFormView(
+      store: Store(initialState: SyncUpFormFeature.State(syncUp: .mock)) {
+        SyncUpFormFeature()
+          ._printChanges()
+      }
+    )
   }
 }
 

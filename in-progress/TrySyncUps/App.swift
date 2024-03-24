@@ -6,7 +6,7 @@ struct SyncUpsApp: App {
   var body: some Scene {
     WindowGroup {
       NavigationStack {
-        SyncUpFormView()
+        //SyncUpFormView()
       }
     }
   }
