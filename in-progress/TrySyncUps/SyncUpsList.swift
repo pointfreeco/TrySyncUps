@@ -41,7 +41,7 @@ struct SyncUpsListFeature {
       case let .syncUpTapped(id):
         guard let syncUpIndex = state.syncUps.firstIndex(where: { $0.id == id })
         else { return .none }
-        state.syncUpDetail = SyncUpDetailFeature.State(syncUp: state.syncUps[syncUpIndex])
+        state.syncUpDetail = SyncUpDetailFeature.State(syncUp: state.$syncUps[syncUpIndex])
         return .none
       case .addSyncUpButtonTapped:
         state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: uuid()))

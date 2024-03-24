@@ -5,12 +5,37 @@ import SwiftUI
 struct SyncUpDetailFeature {
   @ObservableState
   struct State: Equatable {
-    var syncUp: SyncUp
+    @Presents var editSyncUp: SyncUpFormFeature.State?
+    @Shared var syncUp: SyncUp
   }
   enum Action {
+    case editButtonTapped
+    case editSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+    case cancelButtonTapped
+    case saveButtonTapped
   }
   var body: some ReducerOf<Self> {
-    EmptyReducer()
+    Reduce { state, action in
+      switch action {
+      case .editButtonTapped:
+        state.editSyncUp = SyncUpFormFeature.State(syncUp: state.syncUp)
+        return .none
+      case .editSyncUp:
+        return .none
+      case .cancelButtonTapped:
+        state.editSyncUp = nil
+        return .none
+      case .saveButtonTapped:
+        guard let syncUp = state.editSyncUp?.syncUp
+        else { return .none }
+        state.syncUp = syncUp
+        state.editSyncUp = nil
+        return .none
+      }
+    }
+      .ifLet(\.$editSyncUp, action: \.editSyncUp) {
+        SyncUpFormFeature()
+      }
   }
 }
 
@@ -85,17 +110,35 @@ struct SyncUpDetailView: View {
     }
     .toolbar {
       Button("Edit") {
-        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+        store.send(.editButtonTapped)
       }
     }
     .navigationTitle(store.syncUp.title)
+    .sheet(item: $store.scope(state: \.editSyncUp, action: \.editSyncUp)) { editSyncUpStore in
+      NavigationStack {
+        SyncUpFormView(store: editSyncUpStore)
+          .navigationTitle(Text("Edit sync-up"))
+          .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+              Button("Cancel") {
+                store.send(.cancelButtonTapped)
+              }
+            }
+            ToolbarItem {
+              Button("Save") {
+                store.send(.saveButtonTapped)
+              }
+            }
+          }
+      }
+    }
   }
 }
 
 #Preview {
   NavigationStack {
     SyncUpDetailView(
-      store: Store(initialState: SyncUpDetailFeature.State(syncUp: .mock)) {
+      store: Store(initialState: SyncUpDetailFeature.State(syncUp: Shared(.mock))) {
         SyncUpDetailFeature()
       }
     )
