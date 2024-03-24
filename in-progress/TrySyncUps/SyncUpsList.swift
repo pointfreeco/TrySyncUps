@@ -5,9 +5,13 @@ import SwiftUI
 struct SyncUpsListFeature {
   @ObservableState
   struct State: Equatable {
+    @Presents var addSyncUp: SyncUpFormFeature.State?
     var syncUps: [SyncUp] = []
   }
   enum Action {
+    case addButtonTapped
+    case addSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+    case cancelButtonTapped
     case onDelete(_ indexSet: IndexSet)
     case syncUpTapped(id: SyncUp.ID)
     case addSyncUpButtonTapped
@@ -15,14 +19,29 @@ struct SyncUpsListFeature {
   var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
+      case .addButtonTapped:
+        guard let syncUp = state.addSyncUp?.syncUp
+        else { return .none }
+        state.syncUps.append(syncUp)
+        state.addSyncUp = nil
+        return .none
+      case .cancelButtonTapped:
+        state.addSyncUp = nil
+        return .none
       case let .onDelete(indexSet):
         state.syncUps.remove(atOffsets: indexSet)
         return .none
       case .syncUpTapped:
         return .none
       case .addSyncUpButtonTapped:
+        state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: UUID()))
+        return .none
+      case .addSyncUp:
         return .none
       }
+    }
+    .ifLet(\.$addSyncUp, action: \.addSyncUp) {
+      SyncUpFormFeature()
     }
   }
 }
@@ -50,7 +69,7 @@ class SyncUpsListModel {
 
 struct SyncUpsListView: View {
   //let model: SyncUpsListModel
-  let store: StoreOf<SyncUpsListFeature>
+  @Bindable var store: StoreOf<SyncUpsListFeature>
 
   var body: some View {
     List {
@@ -77,6 +96,24 @@ struct SyncUpsListView: View {
       }
     }
     .navigationTitle("Daily Sync-ups")
+    .sheet(item: $store.scope(state: \.addSyncUp, action: \.addSyncUp)) { addSyncUpStore in
+      NavigationStack {
+        SyncUpFormView(store: addSyncUpStore)
+          .navigationTitle("New sync-up")
+          .toolbar {
+            ToolbarItem {
+              Button("Add") {
+                store.send(.addButtonTapped)
+              }
+            }
+            ToolbarItem(placement: .cancellationAction) {
+              Button("Cancel") {
+                store.send(.cancelButtonTapped)
+              }
+            }
+          }
+      }
+    }
   }
 }
 
@@ -84,7 +121,10 @@ struct SyncUpsListView: View {
   NavigationStack {
     SyncUpsListView(
       store: Store(
-        initialState: SyncUpsListFeature.State(syncUps: [.mock, .engineeringMock, .productMock])
+        initialState: SyncUpsListFeature.State(
+          addSyncUp: SyncUpFormFeature.State(syncUp: .mock),
+          syncUps: [.mock, .engineeringMock, .productMock]
+        )
       ) {
         SyncUpsListFeature()._printChanges()
       }
