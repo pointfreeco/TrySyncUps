@@ -20,6 +20,7 @@ struct SyncUpsListFeature {
     case syncUpTapped(id: SyncUp.ID)
     case addSyncUpButtonTapped
   }
+  @Dependency(\.uuid) var uuid
   var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
@@ -38,7 +39,7 @@ struct SyncUpsListFeature {
       case .syncUpTapped:
         return .none
       case .addSyncUpButtonTapped:
-        state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: UUID()))
+        state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: uuid()))
         return .none
       case .addSyncUp:
         return .none
