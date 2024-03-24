@@ -1,4 +1,31 @@
+import ComposableArchitecture
 import SwiftUI
+
+@Reducer
+struct SyncUpsListFeature {
+  @ObservableState
+  struct State {
+    var syncUps: [SyncUp] = []
+  }
+  enum Action {
+    case onDelete(_ indexSet: IndexSet)
+    case syncUpTapped(id: SyncUp.ID)
+    case addSyncUpButtonTapped
+  }
+  var body: some ReducerOf<Self> {
+    Reduce { state, action in
+      switch action {
+      case let .onDelete(indexSet):
+        state.syncUps.remove(atOffsets: indexSet)
+        return .none
+      case .syncUpTapped:
+        return .none
+      case .addSyncUpButtonTapped:
+        return .none
+      }
+    }
+  }
+}
 
 @Observable
 class SyncUpsListModel {
@@ -22,25 +49,29 @@ class SyncUpsListModel {
 }
 
 struct SyncUpsListView: View {
-  let model: SyncUpsListModel
+  //let model: SyncUpsListModel
+  let store: StoreOf<SyncUpsListFeature>
 
   var body: some View {
     List {
-      ForEach(model.syncUps) { syncUp in
+      ForEach(store.syncUps) { syncUp in
         Button {
-          model.syncUpTapped(id: syncUp.id)
+          //model.syncUpTapped(id: syncUp.id)
+          store.send(.syncUpTapped(id: syncUp.id))
         } label: {
           CardView(syncUp: syncUp)
         }
         .listRowBackground(syncUp.theme.mainColor)
       }
       .onDelete { indexSet in
-        model.onDelete(indexSet)
+        //model.onDelete(indexSet)
+        store.send(.onDelete(indexSet))
       }
     }
     .toolbar {
       Button {
-        model.addSyncUpButtonTapped()
+        //model.addSyncUpButtonTapped()
+        store.send(.addSyncUpButtonTapped)
       } label: {
         Image(systemName: "plus")
       }
@@ -51,7 +82,13 @@ struct SyncUpsListView: View {
 
 #Preview {
   NavigationStack {
-    SyncUpsListView(model: SyncUpsListModel())
+    SyncUpsListView(
+      store: Store(
+        initialState: SyncUpsListFeature.State(syncUps: [.mock, .engineeringMock, .productMock])
+      ) {
+        SyncUpsListFeature()._printChanges()
+      }
+    )
   }
 }
 
