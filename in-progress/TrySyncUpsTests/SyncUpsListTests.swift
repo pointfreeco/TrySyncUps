@@ -23,19 +23,21 @@ final class SyncUpsListTests: XCTestCase {
     }
 
     await store.send(.addSyncUpButtonTapped) {
-      $0.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: UUID(0)))
+      $0.destination = .addSyncUp(SyncUpFormFeature.State(syncUp: SyncUp(id: UUID(0))))
     }
 //    await store.send(.addSyncUp(.presented(.set(\.syncUp, SyncUp(id: UUID(0), title: "Morning Sync")))))
-    await store.send(\.addSyncUp.binding.syncUp, SyncUp(id: UUID(0), title: "Morning Sync")) {
-      $0.addSyncUp?.syncUp.title = "Morning Sync"
+    await store.send(\.destination.addSyncUp.binding.syncUp, SyncUp(id: UUID(0), title: "Morning Sync")) {
+      $0.destination?.addSyncUp?.syncUp.title = "Morning Sync"
     }
     await store.send(.addButtonTapped) {
-      $0.addSyncUp = nil
+      $0.destination = nil
       $0.syncUps = [
         SyncUp(id: UUID(0), title: "Morning Sync")
       ]
     }
   }
+
+  
 
   @MainActor
   func testModel() {

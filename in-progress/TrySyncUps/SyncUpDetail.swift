@@ -7,6 +7,7 @@ struct SyncUpDetailFeature {
   struct State: Equatable {
     @Presents var alert: AlertState<Action.Alert>?
     @Presents var editSyncUp: SyncUpFormFeature.State?
+    @Presents var recordMeeting: RecordMeetingFeature.State?
     @Shared var syncUp: SyncUp
   }
   enum Action {
@@ -16,6 +17,8 @@ struct SyncUpDetailFeature {
     case cancelButtonTapped
     case saveButtonTapped
     case deleteButtonTapped
+    case recordMeeting(PresentationAction<RecordMeetingFeature.Action>)
+    case startMeetingButtonTapped
 
     enum Alert {
       case confirmDeletion
@@ -29,18 +32,11 @@ struct SyncUpDetailFeature {
     Reduce { state, action in
       switch action {
       case .alert(.presented(.confirmDeletion)):
-        // TODO
-        // ✅ 1. Delete the sync up from the file storage
-        // ✅ 2. Dismiss this feature, go back to sync ups list
-        
-//        @Shared(.fileStorage(.syncUps)) var syncUps: [SyncUp] = []
-//        syncUps.removeAll(where: { $0.id == state.syncUp.id })
-
-//        return .run { _ in
-//          await dismiss()
-//        }
-
-        return .none
+        return .run { [id = state.syncUp.id] _ in
+          await dismiss()
+          @Shared(.fileStorage(.syncUps)) var syncUps: [SyncUp] = []
+          syncUps.removeAll(where: { $0.id == id })
+        }
 
       case .alert:
         return .none
@@ -68,12 +64,22 @@ struct SyncUpDetailFeature {
           }
         }
         return .none
+
+      case .recordMeeting:
+        return .none
+
+      case .startMeetingButtonTapped:
+        state.recordMeeting = RecordMeetingFeature.State(syncUp: state.syncUp)
+        return .none
       }
     }
       .ifLet(\.$editSyncUp, action: \.editSyncUp) {
         SyncUpFormFeature()
       }
       .ifLet(\.$alert, action: \.alert)
+      .ifLet(\.$recordMeeting, action: \.recordMeeting) {
+        RecordMeetingFeature()
+      }
   }
 }
 
@@ -84,7 +90,7 @@ struct SyncUpDetailView: View {
     Form {
       Section {
         Button {
-          /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Do something...@*//*@END_MENU_TOKEN@*/
+          store.send(.startMeetingButtonTapped)
         } label: {
           Label("Start Meeting", systemImage: "timer")
             .font(.headline)
@@ -171,6 +177,11 @@ struct SyncUpDetailView: View {
       }
     }
     .alert($store.scope(state: \.alert, action: \.alert))
+    .sheet(item: $store.scope(state: \.recordMeeting, action: \.recordMeeting)) { recordMeetingStore in
+      NavigationStack {
+        RecordMeetingView(store: recordMeetingStore)
+      }
+    }
   }
 }
 

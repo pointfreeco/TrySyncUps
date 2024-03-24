@@ -150,7 +150,21 @@ struct SyncUpsListView: View {
       store: Store(
         initialState: SyncUpsListFeature.State(
 //          addSyncUp: SyncUpFormFeature.State(syncUp: .mock),
-          syncUps: [.mock, .engineeringMock, .productMock]
+          syncUps: [
+            SyncUp(
+              id: UUID(),
+              attendees: [
+                Attendee(id: UUID(), name: "Blob 1"),
+                Attendee(id: UUID(), name: "Blob 2"),
+                Attendee(id: UUID(), name: "Blob 3"),
+                Attendee(id: UUID(), name: "Blob 4"),
+                Attendee(id: UUID(), name: "Blob 5"),
+                Attendee(id: UUID(), name: "Blob 6"),
+              ],
+              duration: .seconds(6)
+            )
+//            .mock, .engineeringMock, .productMock
+          ]
         )
       ) {
         SyncUpsListFeature()._printChanges()
