@@ -10,11 +10,13 @@ struct SyncUpsListFeature {
   @ObservableState
   struct State: Equatable {
     @Presents var addSyncUp: SyncUpFormFeature.State?
+    @Presents var syncUpDetail: SyncUpDetailFeature.State?
     @Shared(.fileStorage(.syncUps)) var syncUps: [SyncUp] = []
   }
   enum Action {
     case addButtonTapped
     case addSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+    case syncUpDetail(PresentationAction<SyncUpDetailFeature.Action>)
     case cancelButtonTapped
     case onDelete(_ indexSet: IndexSet)
     case syncUpTapped(id: SyncUp.ID)
@@ -36,17 +38,25 @@ struct SyncUpsListFeature {
       case let .onDelete(indexSet):
         state.syncUps.remove(atOffsets: indexSet)
         return .none
-      case .syncUpTapped:
+      case let .syncUpTapped(id):
+        guard let syncUpIndex = state.syncUps.firstIndex(where: { $0.id == id })
+        else { return .none }
+        state.syncUpDetail = SyncUpDetailFeature.State(syncUp: state.syncUps[syncUpIndex])
         return .none
       case .addSyncUpButtonTapped:
         state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: uuid()))
         return .none
       case .addSyncUp:
         return .none
+      case .syncUpDetail:
+        return .none
       }
     }
     .ifLet(\.$addSyncUp, action: \.addSyncUp) {
       SyncUpFormFeature()
+    }
+    .ifLet(\.$syncUpDetail, action: \.syncUpDetail) {
+      SyncUpDetailFeature()
     }
   }
 }
@@ -119,6 +129,9 @@ struct SyncUpsListView: View {
           }
       }
     }
+    .navigationDestination(item: $store.scope(state: \.syncUpDetail, action: \.syncUpDetail)) { syncUpDetailStore in
+      SyncUpDetailView(store: syncUpDetailStore)
+    }
   }
 }
 
@@ -127,7 +140,7 @@ struct SyncUpsListView: View {
     SyncUpsListView(
       store: Store(
         initialState: SyncUpsListFeature.State(
-          addSyncUp: SyncUpFormFeature.State(syncUp: .mock),
+//          addSyncUp: SyncUpFormFeature.State(syncUp: .mock),
           syncUps: [.mock, .engineeringMock, .productMock]
         )
       ) {
