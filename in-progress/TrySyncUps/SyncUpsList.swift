@@ -7,16 +7,24 @@ extension URL {
 
 @Reducer
 struct SyncUpsListFeature {
+  @Reducer(state: .equatable)
+  enum Destination {
+    case addSyncUp(SyncUpFormFeature)
+    case syncUpDetail(SyncUpDetailFeature)
+  }
+
   @ObservableState
   struct State: Equatable {
-    @Presents var addSyncUp: SyncUpFormFeature.State?
-    @Presents var syncUpDetail: SyncUpDetailFeature.State?
+//    @Presents var addSyncUp: SyncUpFormFeature.State?
+//    @Presents var syncUpDetail: SyncUpDetailFeature.State?
+    @Presents var destination: Destination.State?
     @Shared(.fileStorage(.syncUps)) var syncUps: [SyncUp] = []
   }
   enum Action {
     case addButtonTapped
-    case addSyncUp(PresentationAction<SyncUpFormFeature.Action>)
-    case syncUpDetail(PresentationAction<SyncUpDetailFeature.Action>)
+//    case addSyncUp(PresentationAction<SyncUpFormFeature.Action>)
+//    case syncUpDetail(PresentationAction<SyncUpDetailFeature.Action>)
+    case destination(PresentationAction<Destination.Action>)
     case cancelButtonTapped
     case onDelete(_ indexSet: IndexSet)
     case syncUpTapped(id: SyncUp.ID)
@@ -24,16 +32,16 @@ struct SyncUpsListFeature {
   }
   @Dependency(\.uuid) var uuid
   var body: some ReducerOf<Self> {
-    Reduce { state, action in
+    Reduce<State, Action> { state, action in
       switch action {
       case .addButtonTapped:
-        guard let syncUp = state.addSyncUp?.syncUp
+        guard let syncUp = state.destination?.addSyncUp?.syncUp
         else { return .none }
         state.syncUps.append(syncUp)
-        state.addSyncUp = nil
+        state.destination = nil
         return .none
       case .cancelButtonTapped:
-        state.addSyncUp = nil
+        state.destination = nil
         return .none
       case let .onDelete(indexSet):
         state.syncUps.remove(atOffsets: indexSet)
@@ -41,22 +49,23 @@ struct SyncUpsListFeature {
       case let .syncUpTapped(id):
         guard let syncUpIndex = state.syncUps.firstIndex(where: { $0.id == id })
         else { return .none }
-        state.syncUpDetail = SyncUpDetailFeature.State(syncUp: state.$syncUps[syncUpIndex])
+        state.destination = .syncUpDetail(SyncUpDetailFeature.State(syncUp: state.$syncUps[syncUpIndex]))
         return .none
       case .addSyncUpButtonTapped:
-        state.addSyncUp = SyncUpFormFeature.State(syncUp: SyncUp(id: uuid()))
+        state.destination = .addSyncUp(SyncUpFormFeature.State(syncUp: SyncUp(id: uuid())))
         return .none
-      case .addSyncUp:
-        return .none
-      case .syncUpDetail:
+      case .destination:
         return .none
       }
     }
-    .ifLet(\.$addSyncUp, action: \.addSyncUp) {
-      SyncUpFormFeature()
-    }
-    .ifLet(\.$syncUpDetail, action: \.syncUpDetail) {
-      SyncUpDetailFeature()
+//    .ifLet(\.$addSyncUp, action: \.addSyncUp) {
+//      SyncUpFormFeature()
+//    }
+//    .ifLet(\.$syncUpDetail, action: \.syncUpDetail) {
+//      SyncUpDetailFeature()
+//    }
+    .ifLet(\.$destination, action: \.destination) {
+      Destination.body
     }
   }
 }
@@ -111,7 +120,7 @@ struct SyncUpsListView: View {
       }
     }
     .navigationTitle("Daily Sync-ups")
-    .sheet(item: $store.scope(state: \.addSyncUp, action: \.addSyncUp)) { addSyncUpStore in
+    .sheet(item: $store.scope(state: \.destination?.addSyncUp, action: \.destination.addSyncUp)) { addSyncUpStore in
       NavigationStack {
         SyncUpFormView(store: addSyncUpStore)
           .navigationTitle("New sync-up")
@@ -129,7 +138,7 @@ struct SyncUpsListView: View {
           }
       }
     }
-    .navigationDestination(item: $store.scope(state: \.syncUpDetail, action: \.syncUpDetail)) { syncUpDetailStore in
+    .navigationDestination(item: $store.scope(state: \.destination?.syncUpDetail, action: \.destination.syncUpDetail)) { syncUpDetailStore in
       SyncUpDetailView(store: syncUpDetailStore)
     }
   }

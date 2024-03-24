@@ -9,6 +9,7 @@ struct SyncUpsApp: App {
         SyncUpsListView(
           store: Store(initialState: SyncUpsListFeature.State()) {
             SyncUpsListFeature()
+              ._printChanges()
           }
         )
       }

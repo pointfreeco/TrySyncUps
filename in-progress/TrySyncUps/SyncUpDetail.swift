@@ -35,7 +35,7 @@ struct SyncUpDetailFeature {
         
 //        @Shared(.fileStorage(.syncUps)) var syncUps: [SyncUp] = []
 //        syncUps.removeAll(where: { $0.id == state.syncUp.id })
-//
+
 //        return .run { _ in
 //          await dismiss()
 //        }
